@@ -2,12 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils import timezone
 from .models import Question
-from django.template import loader
+from .models import Quote
 def index(request):
     latest_question_list = Question.objects.order_by("-pub_date") [:5]
-    template = loader.get_template("polls/index.html")
     context= {"latest_question_list": latest_question_list}
-    return HttpResponse(template.render(context,request))
+    viewModel = {
+    "latest_question_list": latest_question_list, 
+    "quote_message": Quote.objects.order_by('?').first()
+  }
+    return render(request,"polls/index.html", viewModel)
 def detail(request, question_id):
     return HttpResponse("You're looking at question %s." % question_id)
 def results(request, question_id):
