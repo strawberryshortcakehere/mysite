@@ -5,6 +5,27 @@ from django.urls import reverse
 
 from .models import Question
 
+class QuestionDetailViewTests(TestCase):
+    def test_future_question(self):
+        """
+        The detail view of a question with a pub_date in the future
+        returns a 404 not found.
+        """
+        future_question = create_question(question_text="Future question.", days=5)
+        url = reverse("polls:detail", args=(future_question.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        
+    def test_past_question(self):
+        """
+        The detail view of a question with a pub_date in the past
+        displays the question's text.
+        """
+        past_question = create_question(question_text="past question.", days=-5)
+        url = reverse("polls:detail", args=(past_question.id,))
+        response = self.client.get(url)
+        self.assertContains(response, past_question.question_text)
+
 def create_question(question_text, days):
     """
     Create a question with the given `question_text` and published the
@@ -16,6 +37,9 @@ def create_question(question_text, days):
 
 class QuestionIndexViewTests(TestCase):
     def test_no_question(self):
+        """
+        If no questions exist, an appropriate message is displayed.
+        """
         response = self.client.get(reverse("polls:index"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No polls are available.")
